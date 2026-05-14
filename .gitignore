@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Rust
+teleos-core/target/
+
+# Go
+bindings/go/teleos.exe
+bindings/go/*.exe
+
+# Java
+bindings/java/target/
+
+# C++
+bindings/cpp/test.exe
+bindings/cpp/*.exe
+bindings/cpp/*.o
+
+# JS
+bindings/js/node_modules/
+bindings/js/dist/
+
+# C#
+bindings/csharp/*/bin/
+bindings/csharp/*/obj/
+
+# VS Code extension
+bindings/vscode/*.vsix
+bindings/vscode/node_modules/
+bindings/vscode/out/
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log

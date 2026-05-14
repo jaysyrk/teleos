@@ -1,0 +1,41 @@
+# Teleos Demo — import: keyword
+#
+# This file imports shared people definitions from base-people.teleos.
+# The facts and rules from that file are available here automatically.
+
+import: base-people.teleos
+
+# ── Resources ─────────────────────────────────────────────────────────────────
+
+fact: report is public
+fact: document is confidential
+fact: payroll is restricted
+
+# ── Access rules ──────────────────────────────────────────────────────────────
+
+rule: if X is admin then X can access Y
+rule: if X is user and Y is public and not X is banned then X can access Y
+rule: if X is staff and Y is restricted then X cannot access Y
+
+# ── Queries ───────────────────────────────────────────────────────────────────
+
+ask: alice can access document
+ask: alice can access report
+ask: bob can access report
+ask: bob can access document
+ask: charlie can access report
+ask: eve can access document
+
+why: bob can access report
+why: charlie can access report
+
+all: WHO can access document
+
+# ── Assertions ────────────────────────────────────────────────────────────────
+
+assert: alice can access document
+assert: alice can access report
+assert: bob can access report
+assert not: bob can access document
+assert not: charlie can access report
+assert: eve can access document

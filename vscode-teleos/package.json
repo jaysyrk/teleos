@@ -1,0 +1,43 @@
+{
+  "name": "teleos",
+  "displayName": "Teleos",
+  "description": "Language support for .teleos logic files — syntax highlighting, snippets, and hover docs",
+  "version": "0.1.0",
+  "publisher": "teleos",
+  "license": "MIT",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Programming Languages", "Snippets"],
+  "keywords": ["teleos", "logic", "rules", "inference"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teleos/teleos"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "teleos",
+        "aliases": ["Teleos", "teleos"],
+        "extensions": [".teleos"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./images/file-icon.svg",
+          "dark": "./images/file-icon.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "teleos",
+        "scopeName": "source.teleos",
+        "path": "./syntaxes/teleos.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "teleos",
+        "path": "./snippets/teleos.json"
+      }
+    ]
+  }}
+
+

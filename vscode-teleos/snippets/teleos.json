@@ -1,0 +1,57 @@
+{
+  "Fact": {
+    "prefix": "fact",
+    "body": "fact: ${1:subject} ${2:predicate} ${3:object}",
+    "description": "Define a fact"
+  },
+  "Rule": {
+    "prefix": "rule",
+    "body": "rule: if ${1:X} ${2:condition} then ${1:X} ${3:conclusion}",
+    "description": "Define a rule"
+  },
+  "Rule with and": {
+    "prefix": "rulea",
+    "body": "rule: if ${1:X} ${2:condition1} and ${1:X} ${3:condition2} then ${1:X} ${4:conclusion}",
+    "description": "Define a rule with two conditions"
+  },
+  "Rule with not": {
+    "prefix": "rulen",
+    "body": "rule: if ${1:X} ${2:condition} and not ${1:X} ${3:excluded} then ${1:X} ${4:conclusion}",
+    "description": "Define a rule with negation"
+  },
+  "Ask query": {
+    "prefix": "ask",
+    "body": "ask: ${1:subject} ${2:predicate} ${3:object}",
+    "description": "Ask a yes/no question"
+  },
+  "Why query": {
+    "prefix": "why",
+    "body": "why: ${1:subject} ${2:predicate} ${3:object}",
+    "description": "Ask for a proof explanation"
+  },
+  "All query": {
+    "prefix": "all",
+    "body": "all: ${1:WHO} ${2:predicate} ${3:object}",
+    "description": "Find all matching values for a variable"
+  },
+  "Assert": {
+    "prefix": "assert",
+    "body": "assert: ${1:subject} ${2:predicate} ${3:object}",
+    "description": "Assert that a query should be true"
+  },
+  "Assert not": {
+    "prefix": "assertn",
+    "body": "assert not: ${1:subject} ${2:predicate} ${3:object}",
+    "description": "Assert that a query should be false"
+  },
+  "Import": {
+    "prefix": "import",
+    "body": "import: ${1:filename.teleos}",
+    "description": "Import facts and rules from another file"
+  },
+  "Numeric rule": {
+    "prefix": "rulenum",
+    "body": "rule: if ${1:X} has ${2:score} ${3:S} and ${3:S} >= ${4:90} then ${1:X} ${5:gets distinction}",
+    "description": "Rule with numeric comparison"
+  }
+}

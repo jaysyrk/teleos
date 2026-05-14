@@ -1,0 +1,57 @@
+# Teleos Demo — Access Control
+#
+# This shows negation in action: 'not X is banned' in a rule
+# succeeds only when Teleos cannot prove 'X is banned'.
+# That's the closed-world assumption — if it isn't stated, it isn't true.
+
+# ── People ────────────────────────────────────────────────────────────────────
+
+fact: alice is admin
+fact: bob is user
+fact: charlie is user
+fact: charlie is banned
+fact: dave is guest
+
+# ── Resources ─────────────────────────────────────────────────────────────────
+
+fact: report is public
+fact: document is confidential
+fact: config is confidential
+
+# ── Rules ─────────────────────────────────────────────────────────────────────
+
+# Admins can access anything
+rule: if X is admin then X can access Y
+
+# Users can access public resources, unless they are banned
+rule: if X is user and Y is public and not X is banned then X can access Y
+
+# Guests can only read public content, and only if not banned
+rule: if X is guest and Y is public and not X is banned then X can read Y
+
+# Anyone banned is explicitly denied
+rule: if X is banned then X is denied
+
+# ── Questions ─────────────────────────────────────────────────────────────────
+
+ask: alice can access document
+ask: alice can access report
+ask: bob can access report
+ask: bob can access document
+ask: charlie can access report
+ask: dave can read report
+ask: charlie is denied
+
+why: alice can access document
+why: bob can access report
+why: charlie can access report
+
+# ── Assertions (run with: teleos test examples/access.teleos) ─────────────────
+
+assert: alice can access document
+assert: alice can access report
+assert: bob can access report
+assert not: bob can access document
+assert not: charlie can access report
+assert: dave can read report
+assert: charlie is denied

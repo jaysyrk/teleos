@@ -1,0 +1,58 @@
+# Teleos Demo — Food & Allergies
+#
+# This shows TWO new features at once:
+#
+#   1. CHAINED RULES — the conclusion of one rule feeds into another.
+#      'unsafe' is derived by a rule, then used as a condition in the 'safe' rule.
+#
+#   2. all: queries — find every X that satisfies a condition.
+#      "all: X is safe for alice" returns every food alice can eat.
+
+# ── People ────────────────────────────────────────────────────────────────────
+
+fact: alice is a person
+fact: bob is a person
+fact: carol is a person
+
+fact: alice is allergic to gluten
+fact: alice is allergic to dairy
+fact: bob is allergic to fish
+
+# ── Foods ─────────────────────────────────────────────────────────────────────
+
+fact: pizza is food
+fact: sushi is food
+fact: salad is food
+fact: pasta is food
+
+fact: pizza contains gluten
+fact: pizza contains dairy
+fact: sushi contains fish
+fact: pasta contains gluten
+
+# salad contains nothing listed — so it is safe for everyone
+
+# ── Rules ─────────────────────────────────────────────────────────────────────
+
+# Rule 1 — derive that a food is unsafe for a person
+# (chained: this conclusion is used by rule 2 below)
+rule: if FOOD contains INGREDIENT and PERSON is allergic to INGREDIENT then FOOD is unsafe for PERSON
+
+# Rule 2 — a food is safe unless it's been proven unsafe
+# (uses the conclusion of rule 1 via 'not')
+rule: if FOOD is food and PERSON is a person and not FOOD is unsafe for PERSON then FOOD is safe for PERSON
+
+# ── Questions ─────────────────────────────────────────────────────────────────
+
+ask: pizza is safe for alice
+ask: salad is safe for alice
+ask: sushi is safe for alice
+ask: sushi is safe for bob
+
+# The star of the show — find ALL safe foods per person
+all: FOOD is safe for alice
+all: FOOD is safe for bob
+all: FOOD is safe for carol
+
+why: sushi is safe for alice
+why: pizza is safe for alice

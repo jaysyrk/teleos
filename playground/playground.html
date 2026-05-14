@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teleos Playground</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1rem 2rem;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #60a5fa;
+      letter-spacing: -0.02em;
+    }
+
+    header .tagline {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .run-btn {
+      margin-left: auto;
+      padding: 0.5rem 1.4rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .run-btn:hover { background: #2563eb; }
+    .run-btn:active { background: #1d4ed8; }
+    .run-btn:disabled { background: #475569; cursor: not-allowed; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      gap: 0;
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #334155;
+    }
+    .pane:last-child { border-right: none; }
+
+    .pane-label {
+      padding: 0.5rem 1rem;
+      background: #1e293b;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      border-bottom: 1px solid #334155;
+    }
+
+    textarea {
+      flex: 1;
+      background: #0f172a;
+      color: #e2e8f0;
+      border: none;
+      resize: none;
+      padding: 1rem;
+      font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      outline: none;
+      tab-size: 2;
+    }
+
+    #output {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-size: 0.875rem;
+      line-height: 1.7;
+    }
+
+    .result-ask { color: #e2e8f0; }
+    .result-ask .label { color: #60a5fa; }
+    .result-ask .answer-true  { color: #34d399; font-weight: 600; }
+    .result-ask .answer-false { color: #f87171; font-weight: 600; }
+
+    .result-why { color: #e2e8f0; }
+    .result-why .label { color: #a78bfa; }
+
+    .result-all { color: #e2e8f0; }
+    .result-all .label { color: #fbbf24; }
+    .result-all .items { color: #86efac; }
+
+    .divider {
+      border-top: 1px solid #1e293b;
+      margin: 0.8rem 0;
+    }
+
+    .test-section {}
+    .test-label { color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+    .test-pass { color: #34d399; }
+    .test-fail { color: #f87171; }
+    .test-summary { margin-top: 0.5rem; font-weight: 600; }
+
+    .error-box {
+      color: #f87171;
+      background: #1e1010;
+      border: 1px solid #7f1d1d;
+      border-radius: 6px;
+      padding: 0.7rem 1rem;
+      white-space: pre-wrap;
+    }
+
+    .placeholder { color: #475569; }
+
+    .examples-bar {
+      padding: 0.4rem 1rem;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+    .examples-bar span { color: #64748b; }
+    .ex-btn {
+      padding: 0.2rem 0.7rem;
+      background: #334155;
+      color: #94a3b8;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      transition: background 0.1s, color 0.1s;
+    }
+    .ex-btn:hover { background: #475569; color: #e2e8f0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Teleos</h1>
+  <span class="tagline">Plain-language logic engine</span>
+  <button class="run-btn" id="runBtn" onclick="runCode()">&#9654; Run</button>
+</header>
+
+<div class="examples-bar">
+  <span>Examples:</span>
+  <button class="ex-btn" onclick="loadExample('access')">Access Control</button>
+  <button class="ex-btn" onclick="loadExample('grades')">Grades</button>
+  <button class="ex-btn" onclick="loadExample('animals')">Animals</button>
+</div>
+
+<div class="workspace">
+  <div class="pane">
+    <div class="pane-label">.teleos &mdash; editor</div>
+    <textarea id="editor" spellcheck="false" placeholder="# Write your Teleos logic here...
+
+fact: alice is admin
+rule: if X is admin then X can access Y
+
+ask: alice can access document
+assert: alice can access document"></textarea>
+  </div>
+
+  <div class="pane">
+    <div class="pane-label">Output</div>
+    <div id="output"><span class="placeholder">Press Run to see results.</span></div>
+  </div>
+</div>
+
+<script>
+const EXAMPLES = {
+  access: `# Access control — uses rules + negation
+fact: alice is admin
+fact: bob is user
+fact: charlie is user
+fact: charlie is banned
+fact: dave is guest
+fact: eve is admin
+
+fact: report is public
+fact: document is confidential
+
+rule: if X is admin then X can access Y
+rule: if X is user and Y is public and not X is banned then X can access Y
+
+ask: alice can access document
+ask: alice can access report
+ask: bob can access report
+ask: bob can access document
+ask: charlie can access report
+ask: eve can access document
+
+why: bob can access report
+why: charlie can access document
+
+all: WHO can access report
+
+assert: alice can access document
+assert: bob can access report
+assert not: bob can access document
+assert not: charlie can access report`,
+
+  grades: `# Grade boundaries with numeric comparisons
+fact: alice has score 95
+fact: bob has score 82
+fact: charlie has score 67
+fact: dave has score 54
+
+rule: if X has score S and S >= 90 then X gets distinction
+rule: if X has score S and S >= 70 and S < 90 then X gets merit
+rule: if X has score S and S >= 50 and S < 70 then X gets pass
+rule: if X has score S and S < 50 then X gets fail
+
+ask: alice gets distinction
+ask: bob gets merit
+ask: charlie gets pass
+ask: dave gets fail
+
+all: WHO gets distinction
+all: WHO gets merit
+
+assert: alice gets distinction
+assert: bob gets merit
+assert not: alice gets fail`,
+
+  animals: `# Classic animals example
+fact: tweety is bird
+fact: tweety can fly
+fact: oscar is cat
+fact: fido is dog
+fact: rex is dog
+
+rule: if X is dog then X is mammal
+rule: if X is cat then X is mammal
+rule: if X is mammal then X has fur
+
+ask: tweety can fly
+ask: tweety is mammal
+ask: fido is mammal
+ask: fido has fur
+ask: oscar has fur
+
+why: fido has fur
+
+all: WHO is mammal
+all: WHO has fur
+
+assert: fido is mammal
+assert: fido has fur
+assert not: tweety is mammal`,
+};
+
+function loadExample(name) {
+  document.getElementById('editor').value = EXAMPLES[name];
+  document.getElementById('output').innerHTML = '<span class="placeholder">Press Run to see results.</span>';
+}
+
+async function runCode() {
+  const source = document.getElementById('editor').value.trim();
+  if (!source) return;
+
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.textContent = 'Running…';
+  document.getElementById('output').innerHTML = '<span class="placeholder">Running…</span>';
+
+  try {
+    const resp = await fetch('/run', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({source}),
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      document.getElementById('output').innerHTML =
+        `<div class="error-box">Error: ${esc(data.error)}</div>`;
+      return;
+    }
+
+    renderResults(data.results || [], data.tests || []);
+  } catch (e) {
+    document.getElementById('output').innerHTML =
+      `<div class="error-box">Network error: ${esc(e.message)}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '&#9654; Run';
+  }
+}
+
+function renderResults(results, tests) {
+  const out = document.getElementById('output');
+  if (!results.length && !tests.length) {
+    out.innerHTML = '<span class="placeholder">No queries or assertions found.</span>';
+    return;
+  }
+
+  let html = '';
+
+  for (const r of results) {
+    if (r.error) {
+      html += `<div class="result-ask"><span class="label">${esc(r.kind)}:</span> ${esc(r.query)} → <span class="error-box">${esc(r.error)}</span></div>`;
+      continue;
+    }
+    if (r.kind === 'ask') {
+      const cls = r.answer === 'True' ? 'answer-true' : 'answer-false';
+      html += `<div class="result-ask"><span class="label">ask:</span> ${esc(r.query)} → <span class="${cls}">${esc(r.answer)}</span></div>`;
+    } else if (r.kind === 'why') {
+      html += `<div class="result-why"><span class="label">why:</span> ${esc(r.query)}<br>&nbsp;&nbsp;&nbsp;${esc(r.answer).replace(/\n/g, '<br>&nbsp;&nbsp;&nbsp;')}</div>`;
+    } else if (r.kind === 'all') {
+      const items = Array.isArray(r.answer) ? r.answer : [r.answer];
+      const itemsStr = items.length ? items.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join(', ') : '(none)';
+      html += `<div class="result-all"><span class="label">all:</span> ${esc(r.query)} → <span class="items">[${esc(itemsStr)}]</span></div>`;
+    }
+  }
+
+  if (tests.length) {
+    if (results.length) html += '<div class="divider"></div>';
+    const passed = tests.filter(t => t.passed).length;
+    html += `<div class="test-section"><div class="test-label">Assertions</div>`;
+    for (const t of tests) {
+      const icon = t.passed ? '✓' : '✗';
+      const cls  = t.passed ? 'test-pass' : 'test-fail';
+      const expectedLabel = t.expect ? '' : ' not';
+      html += `<div class="${cls}">${icon} assert${expectedLabel}: ${esc(t.query)} → ${t.got !== null ? esc(String(t.got)) : 'error'}</div>`;
+    }
+    const summaryClass = passed === tests.length ? 'test-pass' : 'test-fail';
+    html += `<div class="test-summary ${summaryClass}">${passed}/${tests.length} assertions passed</div>`;
+    html += '</div>';
+  }
+
+  out.innerHTML = html;
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// Ctrl+Enter / Cmd+Enter to run
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    runCode();
+  }
+});
+
+// Load access example on startup
+loadExample('access');
+</script>
+</body>
+</html>

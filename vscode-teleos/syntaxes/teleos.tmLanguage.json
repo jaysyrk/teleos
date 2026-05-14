@@ -1,0 +1,131 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Teleos",
+  "scopeName": "source.teleos",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#import" },
+    { "include": "#fact" },
+    { "include": "#rule" },
+    { "include": "#assert" },
+    { "include": "#query" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.number-sign.teleos",
+      "match": "#.*$"
+    },
+
+    "import": {
+      "name": "meta.import.teleos",
+      "match": "^(import)(:)\\s+(.+)$",
+      "captures": {
+        "1": { "name": "keyword.control.import.teleos" },
+        "2": { "name": "punctuation.separator.teleos" },
+        "3": { "name": "string.unquoted.path.teleos" }
+      }
+    },
+
+    "fact": {
+      "name": "meta.fact.teleos",
+      "begin": "^(fact)(:)\\s+",
+      "beginCaptures": {
+        "1": { "name": "storage.type.fact.teleos" },
+        "2": { "name": "punctuation.separator.teleos" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#variable" },
+        { "include": "#number" },
+        { "include": "#term" }
+      ]
+    },
+
+    "rule": {
+      "name": "meta.rule.teleos",
+      "begin": "^(rule)(:)\\s+",
+      "beginCaptures": {
+        "1": { "name": "storage.type.rule.teleos" },
+        "2": { "name": "punctuation.separator.teleos" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#keyword-if" },
+        { "include": "#keyword-then" },
+        { "include": "#keyword-and" },
+        { "include": "#keyword-not" },
+        { "include": "#comparison-op" },
+        { "include": "#variable" },
+        { "include": "#number" },
+        { "include": "#term" }
+      ]
+    },
+
+    "assert": {
+      "name": "meta.assert.teleos",
+      "begin": "^(assert(?:\\s+not)?)(:)\\s+",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.assert.teleos" },
+        "2": { "name": "punctuation.separator.teleos" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#variable" },
+        { "include": "#number" },
+        { "include": "#term" }
+      ]
+    },
+
+    "query": {
+      "name": "meta.query.teleos",
+      "begin": "^(ask|why|all)(:)\\s+",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.query.teleos" },
+        "2": { "name": "punctuation.separator.teleos" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#variable" },
+        { "include": "#number" },
+        { "include": "#term" }
+      ]
+    },
+
+    "keyword-if": {
+      "name": "keyword.control.if.teleos",
+      "match": "\\bif\\b"
+    },
+    "keyword-then": {
+      "name": "keyword.control.then.teleos",
+      "match": "\\bthen\\b"
+    },
+    "keyword-and": {
+      "name": "keyword.operator.logical.and.teleos",
+      "match": "\\band\\b"
+    },
+    "keyword-not": {
+      "name": "keyword.operator.logical.not.teleos",
+      "match": "\\bnot\\b"
+    },
+
+    "comparison-op": {
+      "name": "keyword.operator.comparison.teleos",
+      "match": ">=|<=|!=|>|<|="
+    },
+
+    "variable": {
+      "name": "variable.language.teleos",
+      "match": "\\b[A-Z][A-Z0-9_]*\\b"
+    },
+
+    "number": {
+      "name": "constant.numeric.teleos",
+      "match": "-?\\b\\d+(\\.\\d+)?\\b"
+    },
+
+    "term": {
+      "name": "string.unquoted.term.teleos",
+      "match": "\\b[a-z][a-z0-9_-]*\\b"
+    }
+  }
+}

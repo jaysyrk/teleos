@@ -1,0 +1,40 @@
+# Teleos Demo — Animals
+# Variables are ALL UPPERCASE (X, Y, ANIMAL)
+# Constants are lowercase (eagle, is, a, bird...)
+# Lines starting with # are comments
+
+# ── Facts ────────────────────────────────────────────────────────────────────
+
+fact: eagle is a bird
+fact: eagle has wings
+fact: penguin is a bird
+fact: penguin cannot fly
+fact: salmon is a fish
+fact: salmon lives in water
+fact: oak is a tree
+fact: oak has leaves
+fact: fire is hot
+fact: ice is cold
+fact: ice is water
+
+# ── Rules ────────────────────────────────────────────────────────────────────
+
+rule: if X is a bird and X has wings then X can fly
+rule: if X is a bird and X cannot fly then X is a flightless bird
+rule: if X lives in water then X is aquatic
+rule: if X is a tree and X has leaves then X is a deciduous plant
+rule: if X is hot then X produces heat
+rule: if X is cold and X is water then X is frozen water
+
+# ── Questions ────────────────────────────────────────────────────────────────
+
+ask: eagle can fly
+ask: penguin can fly
+ask: penguin is a flightless bird
+ask: salmon is aquatic
+ask: fire produces heat
+ask: ice is frozen water
+
+why: eagle can fly
+why: penguin is a flightless bird
+why: ice is frozen water

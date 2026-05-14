@@ -1,0 +1,21 @@
+[package]
+name = "teleos-core"
+version = "0.1.0"
+edition = "2021"
+description = "The Teleos logic engine — language-agnostic core"
+
+[lib]
+name = "teleos_core"
+# cdylib = shared library (.dll / .so / .dylib) for FFI from any language
+# rlib   = Rust library so the CLI binary can use it
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "teleos-core"
+path = "src/main.rs"
+
+[dependencies]
+wasm-bindgen = { version = "0.2", optional = true }
+
+[features]
+wasm = ["wasm-bindgen"]

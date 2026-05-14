@@ -1,0 +1,56 @@
+# Teleos Demo — Grades & Arithmetic Comparisons
+#
+# This shows numeric comparisons: >, <, >=, <=, =, !=
+# Variables bound to numbers can be compared directly.
+#
+# The key idea: once a variable is bound to a number (e.g. SCORE = 95),
+# a condition like "SCORE > 80" is evaluated as a real comparison.
+
+# ── Students and their scores ─────────────────────────────────────────────────
+
+fact: alice has score 95
+fact: bob has score 72
+fact: charlie has score 80
+fact: diana has score 55
+fact: eve has score 38
+
+# ── Grade thresholds ──────────────────────────────────────────────────────────
+
+fact: pass threshold is 60
+fact: merit threshold is 75
+fact: distinction threshold is 90
+
+# ── Grade rules ───────────────────────────────────────────────────────────────
+
+rule: if X has score S and S >= 90 then X gets distinction
+rule: if X has score S and S >= 75 and S < 90 then X gets merit
+rule: if X has score S and S >= 60 and S < 75 then X gets pass
+rule: if X has score S and S < 60 then X gets fail
+
+# ── Questions ─────────────────────────────────────────────────────────────────
+
+ask: alice gets distinction
+ask: bob gets merit
+ask: charlie gets merit
+ask: diana gets pass
+ask: diana gets fail
+ask: eve gets fail
+
+why: alice gets distinction
+why: charlie gets merit
+why: diana gets fail
+
+all: WHO gets distinction
+all: WHO gets fail
+
+# ── Assertions (run with: teleos test examples/grades.teleos) ─────────────────
+
+assert: alice gets distinction
+assert not: alice gets fail
+assert: bob gets pass
+assert not: bob gets merit
+assert: charlie gets merit
+assert not: charlie gets distinction
+assert not: diana gets pass
+assert: diana gets fail
+assert: eve gets fail

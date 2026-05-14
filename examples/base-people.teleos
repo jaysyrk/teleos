@@ -1,0 +1,15 @@
+# base-people.teleos — shared people and role definitions
+# Import this file from any .teleos file that needs these facts.
+#
+# import: base-people.teleos
+
+fact: alice is admin
+fact: bob is user
+fact: charlie is user
+fact: charlie is banned
+fact: dave is guest
+fact: eve is admin
+
+rule: if X is admin then X is staff
+rule: if X is user then X is staff
+rule: if X is banned then X is restricted

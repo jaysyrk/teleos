@@ -1,0 +1,25 @@
+{
+  "name": "teleos",
+  "version": "0.1.0",
+  "description": "Plain-language logic engine — write rules in English, query from JavaScript/TypeScript",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist/", "src/"],
+  "scripts": {
+    "build:wasm": "wasm-pack build ../../teleos-core --target nodejs --out-dir ../../bindings/js/src/wasm --features wasm",
+    "build:ts": "tsc && node -e \"require('fs').mkdirSync('dist/wasm',{recursive:true}); require('fs').copyFileSync('src/wasm/teleos_core_bg.wasm','dist/wasm/teleos_core_bg.wasm')\"",
+    "build": "npm run build:wasm && npm run build:ts",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teleos/teleos-js"
+  }
+}
