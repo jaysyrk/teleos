@@ -87,7 +87,6 @@ Teleos includes a Rust core (``teleos-core``) that compiles to a shared library
 callable from any language via C FFI.
 
 Bindings are available for Go, JavaScript/TypeScript, C++, C#, and Java.
-See `<https://github.com/teleos/teleos>`_ for details.
 
 License
 -------
