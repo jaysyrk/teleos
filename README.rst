@@ -1,6 +1,6 @@
 Teleos
 ======
-**NOTICE:** Apparently my timelines seem suspiciou on this project, so I wanted to clear that up. While building this i was in a hypomanic episode. I stayed up for days on end hyperfixated on this project then committed it pretty much all at once, similar to how all my other projects get done.
+**NOTICE:** Apparently my timelines seem suspicious on this project, so I wanted to clear that up. While building this i was in a hypomanic episode. I stayed up for days on end hyperfixated on this project then committed it pretty much all at once, similar to how all my other projects get done.
 
 **Plain-language logic engine — write rules in English, query from any language.**
 
