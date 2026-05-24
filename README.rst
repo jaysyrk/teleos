@@ -26,7 +26,7 @@ Install
 
 .. code-block:: bash
 
-    pip install py-teleos
+    pip install teleos
 
 Quick start
 -----------
@@ -42,6 +42,7 @@ Quick start
     engine.all("WHO can access report")       # ["alice", "bob"]
     engine.add_fact("dave is admin")          # add at runtime
 
+
 CLI
 ---
 
@@ -50,6 +51,25 @@ CLI
     teleos run  rules.teleos   # run all ask:/why:/all: queries
     teleos test rules.teleos   # run all assert: statements
     teleos repl rules.teleos   # interactive session
+
+Architecture Diagram
+--------------------
+
+.. code-block:: mermaid
+
+    graph TD
+      User[User Query]
+      Parser[Parser]
+      AST[AST]
+      Engine[Backward Chaining Engine]
+      Facts[Fact Store]
+      Rules[Rule Store]
+      User --> Parser
+      Parser --> AST
+      AST --> Engine
+      Engine --> Facts
+      Engine --> Rules
+      Engine --> User
 
 .teleos syntax
 --------------
@@ -86,6 +106,7 @@ Teleos includes a Rust core (``teleos-core``) that compiles to a shared library
 callable from any language via C FFI.
 
 Bindings are available for Go, JavaScript/TypeScript, C++, C#, and Java.
+See `<https://github.com/teleos/teleos>`_ for details.
 
 License
 -------

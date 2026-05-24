@@ -1,20 +1,9 @@
-"""
-teleos/cli.py
-
-The front door. Run .teleos files or drop into an interactive session.
-
-  teleos run examples/animals.teleos
-  teleos repl
-  teleos repl examples/animals.teleos   (pre-loads facts/rules, then interactive)
-"""
-
 import sys
 from .parser import parse_file, parse_line, Fact, Rule, Query, Assert, KnowledgeBase
 from .engine import Engine
 
 
 def run_file(path: str) -> None:
-    """Run all queries in a .teleos file and print results."""
     kb = parse_file(path)
     engine = Engine(kb)
 
@@ -43,7 +32,6 @@ def run_file(path: str) -> None:
 
 
 def test_file(path: str) -> int:
-    """Run all assert: statements in a .teleos file. Returns exit code (0 = all pass)."""
     kb = parse_file(path)
     engine = Engine(kb)
 
@@ -84,8 +72,7 @@ def test_file(path: str) -> int:
     return 1 if failed else 0
 
 
-
-    """Interactive Teleos session. Optionally pre-load a file."""
+def repl(path: str = None) -> None:
     kb = parse_file(path) if path else KnowledgeBase()
     engine = Engine(kb)
 
@@ -184,7 +171,6 @@ def main() -> None:
         print("  teleos repl [file.teleos]     — interactive session")
         print("  teleos                        — interactive session (no file)")
     else:
-        # Treat a bare file path as 'run'
         run_file(cmd)
 
 

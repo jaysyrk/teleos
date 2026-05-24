@@ -38,6 +38,11 @@ bindings/csharp/*/obj/
 
 # VS Code extension
 bindings/vscode/*.vsix
+
+# Explicitly allow documentation files
+!README.rst
+!PRD.md
+!ROADMAP.md
 bindings/vscode/node_modules/
 bindings/vscode/out/
 
@@ -45,3 +50,5 @@ bindings/vscode/out/
 .DS_Store
 Thumbs.db
 *.log
+planned_fixes.md
+

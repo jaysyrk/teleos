@@ -1,10 +1,3 @@
-//! teleos-core/src/main.rs  —  standalone CLI binary
-//!
-//! Usage:
-//!   teleos-core run  <file.teleos>
-//!   teleos-core test <file.teleos>
-//!   teleos-core <file.teleos>          (shorthand for run)
-
 use teleos_core::engine::Engine;
 use teleos_core::parser::{parse_file, QueryKind};
 
