@@ -1,10 +1,3 @@
-//! teleos-core/src/parser.rs
-//!
-//! Reads .teleos syntax and turns it into Rust data structures.
-//! Mirrors the logic in the Python teleos/parser.py exactly.
-
-// ── Types ────────────────────────────────────────────────────────────────────
-
 pub type Terms = Vec<String>;
 
 #[derive(Clone, Debug)]
@@ -35,7 +28,7 @@ pub enum QueryKind {
 #[derive(Clone, Debug)]
 pub struct Assert {
     pub terms: Terms,
-    pub expect: bool, // true = must be provable, false = must NOT be provable
+    pub expect: bool,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -45,8 +38,6 @@ pub struct KnowledgeBase {
     pub queries: Vec<Query>,
     pub asserts: Vec<Assert>,
 }
-
-// ── Parsing helpers ───────────────────────────────────────────────────────────
 
 fn parse_terms(text: &str) -> Terms {
     text.split_whitespace().map(|s| s.to_string()).collect()
@@ -65,8 +56,6 @@ fn parse_conditions(text: &str) -> Vec<Condition> {
         })
         .collect()
 }
-
-// ── Line parser ───────────────────────────────────────────────────────────────
 
 pub enum KbItem {
     Fact(Terms),
@@ -89,7 +78,6 @@ pub fn parse_line(line: &str) -> Option<KbItem> {
         "fact" => Some(KbItem::Fact(parse_terms(rest))),
 
         "rule" => {
-            // Strip leading "if "
             let body = if rest.to_lowercase().starts_with("if ") {
                 &rest[3..]
             } else {
@@ -124,13 +112,11 @@ pub fn parse_line(line: &str) -> Option<KbItem> {
     }
 }
 
-// ── Entry points ──────────────────────────────────────────────────────────────
-
 pub fn parse_str(text: &str) -> KnowledgeBase {
-    parse_str_with_dir(text, None)
+    parse_str_with_dir(text, None).unwrap_or_default()
 }
 
-fn parse_str_with_dir(text: &str, base_dir: Option<&std::path::Path>) -> KnowledgeBase {
+fn parse_str_with_dir(text: &str, base_dir: Option<&std::path::Path>) -> Result<KnowledgeBase, std::io::Error> {
     let mut kb = KnowledgeBase::default();
     for line in text.lines() {
         match parse_line(line) {
@@ -145,26 +131,24 @@ fn parse_str_with_dir(text: &str, base_dir: Option<&std::path::Path>) -> Knowled
                     } else {
                         dir.join(&p)
                     };
-                    if let Ok(imported) = parse_file(import_path.to_str().unwrap_or("")) {
-                        kb.facts.extend(imported.facts);
-                        kb.rules.extend(imported.rules);
-                        kb.asserts.extend(imported.asserts);
-                    }
+                    // Propagate file/parse error up via ?
+                    let imported = parse_file(import_path.to_str().unwrap_or(""))?;
+                    kb.facts.extend(imported.facts);
+                    kb.rules.extend(imported.rules);
+                    kb.asserts.extend(imported.asserts);
                 }
             }
             None => {}
         }
     }
-    kb
+    Ok(kb)
 }
 
 pub fn parse_file(path: &str) -> Result<KnowledgeBase, std::io::Error> {
     let content = std::fs::read_to_string(path)?;
     let base_dir = std::path::Path::new(path).parent();
-    Ok(parse_str_with_dir(&content, base_dir))
+    parse_str_with_dir(&content, base_dir)
 }
-
-// ── Tests ─────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
