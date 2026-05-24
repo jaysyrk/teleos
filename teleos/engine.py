@@ -14,11 +14,9 @@ _COMPARISON_OPS = {
     "!=": _op.ne,
 }
 
-
 def is_variable(term: str) -> bool:
     base = term.split("$")[0]
     return bool(base) and base.isalpha() and base.isupper()
-
 
 def resolve(term: str, sub: Substitution) -> str:
     seen: set = set()
@@ -27,10 +25,8 @@ def resolve(term: str, sub: Substitution) -> str:
         term = sub[term]
     return term
 
-
 def apply_sub(terms: Terms, sub: Substitution) -> Terms:
     return tuple(resolve(t, sub) for t in terms)
-
 
 def unify(t1: Terms, t2: Terms, sub: Substitution) -> Optional[Substitution]:
     if len(t1) != len(t2):
@@ -49,14 +45,11 @@ def unify(t1: Terms, t2: Terms, sub: Substitution) -> Optional[Substitution]:
             return None
     return result
 
-
 def rename_vars(terms: Terms, tag: int) -> Terms:
     return tuple(f"{t}${tag}" if is_variable(t) else t for t in terms)
 
-
 def rename_condition(cond: Condition, tag: int) -> Condition:
     return Condition(terms=rename_vars(cond.terms, tag), negated=cond.negated)
-
 
 class ProofNode:
 
@@ -78,7 +71,6 @@ class ProofNode:
         for child in self.children:
             lines.append(child.explain(depth + 1))
         return "\n".join(lines)
-
 
 class Engine:
 

@@ -1,27 +1,11 @@
-"""
-tests/test_teleos.py
-
-Full pytest suite for the Teleos Python engine.
-
-Run:
-    pip install pytest
-    pytest tests/ -v
-"""
-
 import os
 import pytest
 import teleos
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
-
 EXAMPLES = os.path.join(os.path.dirname(__file__), "..", "examples")
-
 
 def example(name: str) -> str:
     return os.path.join(EXAMPLES, name)
-
-
-# ── Basic facts & ask ─────────────────────────────────────────────────────────
 
 class TestBasicFacts:
     def test_direct_fact_true(self):
@@ -43,9 +27,6 @@ class TestBasicFacts:
         assert e.ask("bob is admin") is False
         e.add_fact("bob is admin")
         assert e.ask("bob is admin") is True
-
-
-# ── Rule chaining ─────────────────────────────────────────────────────────────
 
 class TestRuleChaining:
     def test_single_rule(self):
@@ -72,10 +53,7 @@ class TestRuleChaining:
         )
         e = teleos.loads(src)
         assert e.ask("alice can access report") is True
-        assert e.ask("alice can access document") is True  # Y is unbound in rule
-
-
-# ── Negation as failure ───────────────────────────────────────────────────────
+        assert e.ask("alice can access document") is True
 
 class TestNegation:
     COMMON = (
@@ -92,9 +70,6 @@ class TestNegation:
     def test_negation_fails_when_fact_present(self):
         e = teleos.loads(self.COMMON)
         assert e.ask("charlie can post") is False
-
-
-# ── Numeric comparisons ───────────────────────────────────────────────────────
 
 class TestNumericComparisons:
     GRADES = (
@@ -165,9 +140,6 @@ class TestNumericComparisons:
             e = teleos.loads(src.format(op=op, rhs=rhs))
             assert e.ask("result is true") is expected, f"V {op} {rhs} expected {expected}"
 
-
-# ── all: queries ──────────────────────────────────────────────────────────────
-
 class TestAllQueries:
     def test_single_variable(self):
         src = (
@@ -193,9 +165,6 @@ class TestAllQueries:
         e = teleos.loads(src)
         result = e.all("WHO is mammal")
         assert sorted(result) == ["fido", "whiskers"]
-
-
-# ── why: explanations ─────────────────────────────────────────────────────────
 
 class TestWhyExplanations:
     def test_why_fact(self):
@@ -226,9 +195,6 @@ class TestWhyExplanations:
         why = e.why("alice gets distinction")
         assert "95" in why
 
-
-# ── assert: / test mode ───────────────────────────────────────────────────────
-
 class TestAssertMode:
     def test_all_assertions_pass(self):
         src = (
@@ -245,7 +211,7 @@ class TestAssertMode:
     def test_failing_assertion_detected(self):
         src = (
             "fact: alice is admin\n"
-            "assert not: alice is admin\n"  # wrong — alice IS admin
+            "assert not: alice is admin\n"
         )
         e = teleos.loads(src)
         results = e.test()
@@ -257,18 +223,15 @@ class TestAssertMode:
         assert results["passed"] == 0
         assert results["failed"] == 0
 
-
-# ── import: keyword ───────────────────────────────────────────────────────────
-
 class TestImport:
     def test_import_facts_available(self):
         e = teleos.load(example("import-demo.teleos"))
-        # alice is admin in base-people.teleos
+
         assert e.ask("alice is admin") is True
 
     def test_import_rules_available(self):
         e = teleos.load(example("import-demo.teleos"))
-        # rule: if X is admin then X is staff — from base-people.teleos
+
         assert e.ask("alice is staff") is True
 
     def test_import_plus_local_rules(self):
@@ -280,9 +243,6 @@ class TestImport:
         e = teleos.load(example("import-demo.teleos"))
         results = e.test()
         assert results["failed"] == 0, results["results"]
-
-
-# ── Example files — all assertions pass ──────────────────────────────────────
 
 @pytest.mark.parametrize("filename,expected_assertions", [
     ("access.teleos",      7),
@@ -304,9 +264,6 @@ def test_example_assertions(filename, expected_assertions):
         f"{filename}: expected {expected_assertions} assertions, found {results['passed']}"
     )
 
-
-# ── Parser errors ─────────────────────────────────────────────────────────────
-
 class TestParserErrors:
     def test_unknown_keyword_raises(self):
         with pytest.raises(ValueError, match="Unknown keyword"):
@@ -319,9 +276,6 @@ class TestParserErrors:
     def test_comment_only_ok(self):
         e = teleos.loads("# this is a comment\n# another comment")
         assert e.ask("anything") is False
-
-
-# ── API surface ───────────────────────────────────────────────────────────────
 
 class TestAPIShape:
     def test_facts_list(self):

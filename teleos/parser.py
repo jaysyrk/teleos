@@ -4,40 +4,33 @@ import os
 
 Terms = Tuple[str, ...]
 
-
 @dataclass
 class Fact:
     terms: Terms
-
 
 @dataclass
 class Condition:
     terms: Terms
     negated: bool = False
 
-
 @dataclass
 class Rule:
     head: Terms
     conditions: List[Condition]
-
 
 @dataclass
 class Query:
     terms: Terms
     kind: str
 
-
 @dataclass
 class Assert:
     terms: Terms
     expect: bool = True
 
-
 @dataclass
 class _Import:
     path: str
-
 
 @dataclass
 class KnowledgeBase:
@@ -46,10 +39,8 @@ class KnowledgeBase:
     queries: List[Query] = field(default_factory=list)
     asserts: List[Assert] = field(default_factory=list)
 
-
 def _parse_terms(text: str) -> Terms:
     return tuple(text.strip().split())
-
 
 def _parse_conditions(text: str) -> List[Condition]:
     parts = [p.strip() for p in text.split(" and ")]
@@ -62,7 +53,6 @@ def _parse_conditions(text: str) -> List[Condition]:
         else:
             result.append(Condition(terms=_parse_terms(p), negated=False))
     return result
-
 
 def parse_line(line: str) -> Optional[object]:
     line = line.strip()
@@ -117,7 +107,6 @@ def parse_line(line: str) -> Optional[object]:
             f"Unknown keyword {keyword!r}. Expected: fact, rule, ask, why, all, assert, assert not, import"
         )
 
-
 def _load(lines, base_dir: str = "") -> KnowledgeBase:
     kb = KnowledgeBase()
     for lineno, line in enumerate(lines, 1):
@@ -141,12 +130,10 @@ def _load(lines, base_dir: str = "") -> KnowledgeBase:
             kb.asserts.extend(imported.asserts)
     return kb
 
-
 def parse_file(path: str) -> KnowledgeBase:
     base_dir = os.path.dirname(os.path.abspath(path))
     with open(path, "r", encoding="utf-8") as f:
         return _load(f, base_dir=base_dir)
-
 
 def parse_string(text: str, base_dir: str = "") -> KnowledgeBase:
     return _load(text.splitlines(), base_dir=base_dir)

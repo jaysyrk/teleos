@@ -1,12 +1,3 @@
-"""
-Teleos web playground — tiny FastAPI server.
-
-Usage:
-    pip install fastapi uvicorn
-    python playground.py
-    open http://localhost:8000
-"""
-
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -17,12 +8,10 @@ app = FastAPI()
 
 HTML_PATH = os.path.join(os.path.dirname(__file__), "playground.html")
 
-
 @app.get("/", response_class=HTMLResponse)
 async def root():
     with open(HTML_PATH, encoding="utf-8") as f:
         return f.read()
-
 
 @app.post("/run")
 async def run_program(request: Request):
@@ -35,7 +24,6 @@ async def run_program(request: Request):
 
     results = []
 
-    # Re-parse to get query lines in order
     try:
         from teleos.parser import parse_string, Query, Assert
         kb = parse_string(source)
@@ -58,7 +46,6 @@ async def run_program(request: Request):
         except Exception as e:
             results.append({"kind": q.kind, "query": query_str, "error": str(e)})
 
-    # Run assertions
     test_results = []
     for a in kb.asserts:
         query_str = " ".join(a.terms)
@@ -81,7 +68,6 @@ async def run_program(request: Request):
             })
 
     return JSONResponse({"results": results, "tests": test_results})
-
 
 if __name__ == "__main__":
     import uvicorn

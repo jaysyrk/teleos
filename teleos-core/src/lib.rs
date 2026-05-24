@@ -52,7 +52,7 @@ pub extern "C" fn teleos_why(handle: *mut TeleosHandle, query: *const c_char) ->
 pub extern "C" fn teleos_all(handle: *mut TeleosHandle, query: *const c_char) -> *mut c_char {
     let (h, q) = match get_handle_query(handle, query) { Some(x) => x, None => return ptr::null_mut() };
     let solutions = h.engine.all_solutions(&q);
-    
+
     let mut var_indices = Vec::new();
     for (i, term) in q.iter().enumerate() {
         if engine::is_variable(term) {
@@ -86,7 +86,6 @@ pub extern "C" fn teleos_all(handle: *mut TeleosHandle, query: *const c_char) ->
 
     str_to_ptr(result)
 }
-
 
 #[no_mangle]
 pub extern "C" fn teleos_add_fact(handle: *mut TeleosHandle, fact: *const c_char) -> i32 {

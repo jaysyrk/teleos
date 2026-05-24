@@ -2,7 +2,6 @@ import sys
 from .parser import parse_file, parse_line, Fact, Rule, Query, Assert, KnowledgeBase
 from .engine import Engine
 
-
 def run_file(path: str) -> None:
     kb = parse_file(path)
     engine = Engine(kb)
@@ -29,7 +28,6 @@ def run_file(path: str) -> None:
             else:
                 print("  → (none)")
             print()
-
 
 def test_file(path: str) -> int:
     kb = parse_file(path)
@@ -70,7 +68,6 @@ def test_file(path: str) -> int:
         print(f"{passed}/{total} passed, {failed} failed.")
 
     return 1 if failed else 0
-
 
 def repl(path: str = None) -> None:
     kb = parse_file(path) if path else KnowledgeBase()
@@ -148,7 +145,6 @@ def repl(path: str = None) -> None:
         except ValueError as e:
             print(f"  Error: {e}\n")
 
-
 def main() -> None:
     args = sys.argv[1:]
 
@@ -172,7 +168,6 @@ def main() -> None:
         print("  teleos                        — interactive session (no file)")
     else:
         run_file(cmd)
-
 
 if __name__ == "__main__":
     main()

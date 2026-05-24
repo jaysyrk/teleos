@@ -3,7 +3,6 @@ from typing import Dict, List, Union
 from .engine import Engine, is_variable, apply_sub
 from .parser import _parse_terms, parse_file, parse_string, parse_line, Rule, Assert
 
-
 class Teleos:
 
     def __init__(self, engine: Engine, asserts=None):
@@ -100,10 +99,8 @@ class Teleos:
             f"{len(self._engine.rules)} rules>"
         )
 
-
 def load(path: str) -> Teleos:
     return Teleos.load(path)
-
 
 def loads(text: str) -> Teleos:
     return Teleos.loads(text)

@@ -27,7 +27,7 @@ impl TeleosEngine {
         pub fn all(&mut self, query: &str) -> String {
         let terms = terms(query);
         let solutions = self.engine.all_solutions(&terms);
-        
+
         let mut var_indices = Vec::new();
         for (i, term) in terms.iter().enumerate() {
             if crate::engine::is_variable(term) {
@@ -59,7 +59,6 @@ impl TeleosEngine {
             lines.join("\n")
         }
     }
-
 
     pub fn add_fact(&mut self, fact: &str) {
         self.engine.add_fact(terms(fact));

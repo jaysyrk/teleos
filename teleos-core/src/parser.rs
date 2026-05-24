@@ -131,7 +131,7 @@ fn parse_str_with_dir(text: &str, base_dir: Option<&std::path::Path>) -> Result<
                     } else {
                         dir.join(&p)
                     };
-                    // Propagate file/parse error up via ?
+
                     let imported = parse_file(import_path.to_str().unwrap_or(""))?;
                     kb.facts.extend(imported.facts);
                     kb.rules.extend(imported.rules);
