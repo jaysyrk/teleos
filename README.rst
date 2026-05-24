@@ -26,7 +26,8 @@ Install
 
 .. code-block:: bash
 
-    pip install teleos
+    pip install py-teleos
+
 
 Quick start
 -----------
