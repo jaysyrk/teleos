@@ -1,23 +1,13 @@
-//! teleos-core/src/engine.rs
-//!
-//! Backward-chaining inference engine with negation as failure.
-//! Mirrors the logic in the Python teleos/engine.py exactly.
-
 use std::collections::{HashMap, HashSet};
 use crate::parser::{Condition, KnowledgeBase, Rule, Terms};
 
 pub type Sub = HashMap<String, String>;
 
-// ── Variable helpers ──────────────────────────────────────────────────────────
-
-/// A term is a variable if every character (ignoring a "$N" rename suffix) is
-/// an uppercase ASCII letter.  e.g. "X", "FOOD", "PERSON", "X$3" are variables.
 fn is_variable(term: &str) -> bool {
     let base = term.split('$').next().unwrap_or("");
     !base.is_empty() && base.chars().all(|c| c.is_ascii_alphabetic() && c.is_ascii_uppercase())
 }
 
-/// Follow a substitution chain to its concrete value.
 fn resolve(term: &str, sub: &Sub) -> String {
     let mut current = term.to_string();
     let mut seen = HashSet::new();
@@ -40,8 +30,6 @@ fn apply_sub(terms: &[String], sub: &Sub) -> Terms {
     terms.iter().map(|t| resolve(t, sub)).collect()
 }
 
-/// Try to match two term sequences, extending `sub`.
-/// Returns the extended substitution on success, or None on failure.
 fn unify(t1: &[String], t2: &[String], sub: &Sub) -> Option<Sub> {
     if t1.len() != t2.len() {
         return None;
@@ -57,7 +45,7 @@ fn unify(t1: &[String], t2: &[String], sub: &Sub) -> Option<Sub> {
         } else if is_variable(&b) {
             result.insert(b, a);
         } else {
-            return None; // two different constants — no match
+            return None;
         }
     }
     Some(result)
@@ -72,8 +60,6 @@ fn rename_terms(terms: &[String], tag: usize) -> Terms {
 fn rename_condition(cond: &Condition, tag: usize) -> Condition {
     Condition { terms: rename_terms(&cond.terms, tag), negated: cond.negated }
 }
-
-// ── Proof tree ────────────────────────────────────────────────────────────────
 
 #[derive(Clone)]
 pub enum Reason { Fact, Rule, Negation, Comparison }
@@ -104,8 +90,6 @@ impl ProofNode {
     }
 }
 
-// ── Engine ────────────────────────────────────────────────────────────────────
-
 pub struct Engine {
     pub facts: Vec<Terms>,
     pub rules: Vec<Rule>,
@@ -121,8 +105,6 @@ impl Engine {
         self.counter += 1;
         self.counter
     }
-
-    // ── Public API ────────────────────────────────────────────────────────────
 
     pub fn ask(&mut self, goal: &[String]) -> bool {
         self.prove_one(goal, &Sub::new(), 0).is_some()
@@ -156,14 +138,10 @@ impl Engine {
         self.rules.push(rule);
     }
 
-    // ── Internal: backward chaining ───────────────────────────────────────────
-
-    /// Return the first proof, or None.
     fn prove_one(&mut self, goal: &[String], sub: &Sub, depth: usize) -> Option<(Sub, ProofNode)> {
         self.prove_all(goal, sub, depth).into_iter().next()
     }
 
-    /// Collect every proof of `goal`.  Used by all_solutions() and internally.
     fn prove_all(&mut self, goal: &[String], sub: &Sub, depth: usize) -> Vec<(Sub, ProofNode)> {
         if depth > 30 {
             return vec![];
@@ -171,7 +149,6 @@ impl Engine {
         let concrete = apply_sub(goal, sub);
         let mut results: Vec<(Sub, ProofNode)> = Vec::new();
 
-        // Built-in: numeric comparison  e.g. ["S", ">", "80"]
         if concrete.len() == 3 {
             let op = concrete[1].as_str();
             if matches!(op, ">" | "<" | ">=" | "<=" | "=" | "!=") {
@@ -196,11 +173,10 @@ impl Engine {
                         }));
                     }
                 }
-                return results; // comparison handled — skip fact/rule lookup
+                return results;
             }
         }
 
-        // Try facts
         let facts = self.facts.clone();
         for fact in &facts {
             if let Some(new_sub) = unify(&concrete, fact, sub) {
@@ -213,7 +189,6 @@ impl Engine {
             }
         }
 
-        // Try rules
         let rules = self.rules.clone();
         for rule in &rules {
             let tag = self.fresh_tag();
@@ -231,8 +206,6 @@ impl Engine {
         results
     }
 
-    /// Recursively prove a list of conditions, yielding one result per
-    /// combination of solutions that satisfies all of them.
     fn prove_conds(
         &mut self,
         conds: &[Condition],
@@ -241,7 +214,6 @@ impl Engine {
         goal: &[String],
         children: Vec<ProofNode>,
     ) -> Vec<(Sub, ProofNode)> {
-        // Base case: all conditions satisfied
         if conds.is_empty() {
             return vec![(sub.clone(), ProofNode {
                 conclusion: apply_sub(goal, sub),
@@ -250,11 +222,10 @@ impl Engine {
             })];
         }
 
-        let (cond, rest) = conds.split_first().unwrap();
-        let mut results = Vec::new();
+    let (cond, rest) = conds.split_first().unwrap();
+        let mut vec_results = Vec::new();
 
         if cond.negated {
-            // Negation as failure: succeed only if we CANNOT prove the positive form.
             let has_proof = self.prove_one(&cond.terms, sub, depth + 1).is_some();
             if !has_proof {
                 let neg_text = apply_sub(&cond.terms, sub);
@@ -265,7 +236,7 @@ impl Engine {
                     children: vec![],
                 });
                 let mut sub_results = self.prove_conds(rest, sub, depth, goal, new_children);
-                results.append(&mut sub_results);
+                vec_results.append(&mut sub_results);
             }
         } else {
             let pos_results = self.prove_all(&cond.terms, sub, depth + 1);
@@ -273,17 +244,13 @@ impl Engine {
                 let mut new_children = children.clone();
                 new_children.push(child_node);
                 let mut sub_results = self.prove_conds(rest, &new_sub, depth, goal, new_children);
-                results.append(&mut sub_results);
+                vec_results.append(&mut sub_results);
             }
         }
 
-        results
+        vec_results
+
     }
-
-    // ── Failure diagnosis ─────────────────────────────────────────────────────
-
-    /// Explain WHY a goal cannot be proven.
-    /// Finds the rule that got furthest and pinpoints the exact blocking condition.
     fn explain_failure(&mut self, goal: &[String]) -> String {
         let concrete = apply_sub(goal, &Sub::new());
         let goal_text = concrete.join(" ");
@@ -292,7 +259,6 @@ impl Engine {
         let mut best_msg = String::new();
         let mut best_blocker: Option<ProofNode> = None;
 
-        #[allow(unused_variables)]
         let rules = self.rules.clone();
         for rule in &rules {
             let tag = self.fresh_tag();
@@ -363,8 +329,6 @@ impl Engine {
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────────
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -377,8 +341,6 @@ mod tests {
     fn goal(s: &str) -> Terms {
         s.split_whitespace().map(|w| w.to_string()).collect()
     }
-
-    // ── Basic facts ──────────────────────────────────────────────────────────
 
     #[test]
     fn direct_fact_true() {
@@ -406,8 +368,6 @@ mod tests {
         assert!(eng.ask(&goal("bob is admin")));
     }
 
-    // ── Rule chaining ─────────────────────────────────────────────────────────
-
     #[test]
     fn single_rule() {
         let mut eng = e("fact: alice is admin\nrule: if X is admin then X can access Y");
@@ -425,8 +385,6 @@ mod tests {
         assert!(eng.ask(&goal("fido has fur")));
     }
 
-    // ── Negation as failure ───────────────────────────────────────────────────
-
     #[test]
     fn negation_succeeds_when_absent() {
         let src = "fact: alice is user\n\
@@ -437,8 +395,6 @@ mod tests {
         assert!(eng.ask(&goal("alice can post")));
         assert!(!eng.ask(&goal("charlie can post")));
     }
-
-    // ── Numeric comparisons ───────────────────────────────────────────────────
 
     #[test]
     fn distinction_above_90() {
@@ -503,8 +459,6 @@ mod tests {
         }
     }
 
-    // ── all_solutions ─────────────────────────────────────────────────────────
-
     #[test]
     fn all_solutions_basic() {
         let src = "fact: alice is admin\n\
@@ -525,8 +479,6 @@ mod tests {
         assert!(eng.all_solutions(&goal("WHO is admin")).is_empty());
     }
 
-    // ── assert: mode ─────────────────────────────────────────────────────────
-
     #[test]
     fn assertions_pass() {
         use crate::parser::parse_str;
@@ -545,8 +497,6 @@ mod tests {
         assert_eq!(passed, 2);
         assert_eq!(failed, 0);
     }
-
-    // ── Example files ─────────────────────────────────────────────────────────
 
     fn run_example_assertions(path: &str) -> (usize, usize) {
         let kb = crate::parser::parse_file(path).expect("parse failed");
