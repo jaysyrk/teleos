@@ -1,21 +1,3 @@
-//! teleos-core/src/lib.rs
-//!
-//! Public Rust API + C FFI exports.
-//!
-//! The FFI lets any language (Python, Go, Lua, JS via WASM, C, ...) load
-//! teleos_core.dll / .so and call the engine without knowing Rust.
-//!
-//! C header (for reference):
-//!
-//!   TeleosHandle* teleos_from_str(const char* text);
-//!   TeleosHandle* teleos_from_file(const char* path);
-//!   int           teleos_ask(TeleosHandle*, const char* query);  // 1=true 0=false -1=err
-//!   char*         teleos_why(TeleosHandle*, const char* query);  // caller must teleos_free_str
-//!   char*         teleos_all(TeleosHandle*, const char* query);  // newline-separated
-//!   int           teleos_add_fact(TeleosHandle*, const char* fact);
-//!   void          teleos_free_str(char* s);
-//!   void          teleos_free(TeleosHandle*);
-
 pub mod engine;
 pub mod parser;
 
@@ -29,15 +11,10 @@ use std::ptr;
 use engine::Engine;
 use parser::{parse_file, parse_str};
 
-// ── Opaque handle ─────────────────────────────────────────────────────────────
-
 pub struct TeleosHandle {
     pub engine: Engine,
 }
 
-// ── Constructors ──────────────────────────────────────────────────────────────
-
-/// Create an engine from a .teleos string.
 #[no_mangle]
 pub extern "C" fn teleos_from_str(text: *const c_char) -> *mut TeleosHandle {
     if text.is_null() { return ptr::null_mut(); }
@@ -47,7 +24,6 @@ pub extern "C" fn teleos_from_str(text: *const c_char) -> *mut TeleosHandle {
     Box::into_raw(Box::new(TeleosHandle { engine: Engine::new(kb) }))
 }
 
-/// Create an engine from a .teleos file path.
 #[no_mangle]
 pub extern "C" fn teleos_from_file(path: *const c_char) -> *mut TeleosHandle {
     if path.is_null() { return ptr::null_mut(); }
@@ -59,16 +35,12 @@ pub extern "C" fn teleos_from_file(path: *const c_char) -> *mut TeleosHandle {
     }
 }
 
-// ── Queries ───────────────────────────────────────────────────────────────────
-
-/// Returns 1 (true), 0 (false), or -1 (error).
 #[no_mangle]
 pub extern "C" fn teleos_ask(handle: *mut TeleosHandle, query: *const c_char) -> i32 {
     let (h, q) = match get_handle_query(handle, query) { Some(x) => x, None => return -1 };
     if h.engine.ask(&q) { 1 } else { 0 }
 }
 
-/// Returns a heap-allocated explanation string.  Caller must call teleos_free_str.
 #[no_mangle]
 pub extern "C" fn teleos_why(handle: *mut TeleosHandle, query: *const c_char) -> *mut c_char {
     let (h, q) = match get_handle_query(handle, query) { Some(x) => x, None => return ptr::null_mut() };
@@ -76,18 +48,46 @@ pub extern "C" fn teleos_why(handle: *mut TeleosHandle, query: *const c_char) ->
     str_to_ptr(result)
 }
 
-/// Returns newline-separated solutions.  Caller must call teleos_free_str.
 #[no_mangle]
 pub extern "C" fn teleos_all(handle: *mut TeleosHandle, query: *const c_char) -> *mut c_char {
     let (h, q) = match get_handle_query(handle, query) { Some(x) => x, None => return ptr::null_mut() };
     let solutions = h.engine.all_solutions(&q);
-    let result = solutions.iter().map(|s| s.join(" ")).collect::<Vec<_>>().join("\n");
+    
+    let mut var_indices = Vec::new();
+    for (i, term) in q.iter().enumerate() {
+        if engine::is_variable(term) {
+            var_indices.push((term.clone(), i));
+        }
+    }
+
+    let result = if var_indices.is_empty() {
+        if solutions.is_empty() {
+            "".to_string()
+        } else {
+            "true".to_string()
+        }
+    } else if var_indices.len() == 1 {
+        let idx = var_indices[0].1;
+        solutions.iter()
+            .map(|sol| sol[idx].clone())
+            .collect::<Vec<_>>()
+            .join("\n")
+    } else {
+        let mut lines = Vec::new();
+        for sol in &solutions {
+            let mut pairs = Vec::new();
+            for (name, idx) in &var_indices {
+                pairs.push(format!("{}={}", name, sol[*idx]));
+            }
+            lines.push(pairs.join(" "));
+        }
+        lines.join("\n")
+    };
+
     str_to_ptr(result)
 }
 
-// ── Mutations ─────────────────────────────────────────────────────────────────
 
-/// Add a fact at runtime.  Returns 0 on success, -1 on error.
 #[no_mangle]
 pub extern "C" fn teleos_add_fact(handle: *mut TeleosHandle, fact: *const c_char) -> i32 {
     if handle.is_null() || fact.is_null() { return -1; }
@@ -99,9 +99,6 @@ pub extern "C" fn teleos_add_fact(handle: *mut TeleosHandle, fact: *const c_char
     0
 }
 
-// ── Memory management ─────────────────────────────────────────────────────────
-
-/// Free a string returned by teleos_why or teleos_all.
 #[no_mangle]
 pub extern "C" fn teleos_free_str(s: *mut c_char) {
     if !s.is_null() {
@@ -109,15 +106,12 @@ pub extern "C" fn teleos_free_str(s: *mut c_char) {
     }
 }
 
-/// Free an engine handle.
 #[no_mangle]
 pub extern "C" fn teleos_free(handle: *mut TeleosHandle) {
     if !handle.is_null() {
         unsafe { drop(Box::from_raw(handle)) };
     }
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 fn get_handle_query<'a>(
     handle: *mut TeleosHandle,

@@ -3,7 +3,7 @@ use crate::parser::{Condition, KnowledgeBase, Rule, Terms};
 
 pub type Sub = HashMap<String, String>;
 
-fn is_variable(term: &str) -> bool {
+pub(crate) fn is_variable(term: &str) -> bool {
     let base = term.split('$').next().unwrap_or("");
     !base.is_empty() && base.chars().all(|c| c.is_ascii_alphabetic() && c.is_ascii_uppercase())
 }
